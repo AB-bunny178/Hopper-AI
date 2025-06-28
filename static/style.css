@@ -1,0 +1,226 @@
+/* === Base === */
+body {
+  background: linear-gradient(to bottom right, #1e1e2e, #6c63ff);
+  color: #f0f0f0;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+/* === Header === */
+header {
+  background: linear-gradient(to right, #2b2b3d, #6c63ff);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.left-header {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  height: 40px;
+  margin-right: 12px;
+}
+
+.name {
+  font-size: 22px;
+  color: white;
+}
+
+/* === Toggle Switch Styling === */
+.toggle-container {
+  display: flex;
+  align-items: center;
+}
+
+.toggle-switch {
+  position: relative;
+}
+
+.toggle-switch input {
+  display: none;
+}
+
+.toggle-switch .slider {
+  width: 50px;
+  height: 25px;
+  background-color: #444;
+  border-radius: 25px;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.toggle-switch .slider::before {
+  content: "";
+  width: 22px;
+  height: 22px;
+  background-color: white;
+  position: absolute;
+  left: 2px;
+  top: 1.5px;
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+
+.toggle-switch input:checked + .slider {
+  background-color: #2196F3;
+}
+
+.toggle-switch input:checked + .slider::before {
+  transform: translateX(25px);
+}
+
+/* === Footer === */
+
+ footer {
+  /* background: #121212; */
+  padding: 10px;
+  font-size: 14px;
+  color: #aaa;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  z-index: 999;
+}
+
+
+/* === Chat Box === */
+#chat-box {
+  height: 50vh;
+  max-height: 60vh;
+  width: 80%;
+  margin: 20px auto;
+  background: #0d0d0d;
+  border: 1px solid #444;
+  padding: 10px;
+  overflow-y: auto;
+  text-align: left;
+  border-radius: 6px;
+}
+
+#chat-box .user {
+  color: #00e676;
+}
+
+#chat-box .jarvis {
+  color: #00bcd4;
+}
+
+#chat-box p {
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+/* === Input === */
+input#prompt {
+  width: 60%;
+  padding: 10px;
+  font-size: 16px;
+  margin-bottom: 10px;
+  background: linear-gradient(to right, #2d2d2d, #3c8dbc);
+  color: white;
+  border: none;
+  outline: none;
+  border-radius: 6px;
+  transition: border 0.2s ease;
+}
+
+input:focus {
+  border: 1px solid #00bcd4;
+  background: #1a1a1a;
+}
+
+/* === Buttons === */
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.buttons button {
+  background: linear-gradient(to right, #ff416c, #ff4b2b);
+  border: none;
+  padding: 10px 20px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 5px;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+}
+
+.buttons button:hover {
+  background: linear-gradient(to right, #ff4b2b, #ff416c);
+  transform: scale(1.05);
+}
+
+/* === Code Formatting === */
+pre {
+  background: #1a1a1a;
+  color: #00ffcc;
+  padding: 10px;
+  overflow-x: auto;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  margin: 10px 0;
+}
+
+code {
+  white-space: pre-wrap;
+}
+
+/* === Light Mode === */
+body.light-mode {
+  background: linear-gradient(to bottom right, #e0e0e0, #ffffff);
+  color: #121212;
+}
+
+body.light-mode header,
+body.light-mode footer {
+  background: #f0f0f0;
+  color: #333;
+}
+
+body.light-mode .name {
+  color: #2b2b2b;
+}
+
+body.light-mode #chat-box {
+  background: #ffffff;
+  color: #222;
+  border: 1px solid #ccc;
+}
+
+body.light-mode input#prompt {
+  background: linear-gradient(to right, #cfd9df, #e2ebf0);
+  color: #111;
+}
+
+body.light-mode .buttons button {
+  background: linear-gradient(to right, #333, #666);
+  color: white;
+}
+
+body.light-mode pre {
+  background: #f5f5f5;
+  color: #004d40;
+}
+
+body.light-mode .toggle-switch .slider {
+  background-color: #bbb;
+}
+
+body.light-mode .toggle-switch input:checked + .slider {
+  background-color: #2196F3;
+}

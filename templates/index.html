@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Jarvis - Web Assistant</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+  <div class="left-header">
+    <img src="/static/logo.jpeg" alt="Logo" class="logo" />
+    <h1 class="name">Jarvis AI</h1>
+  </div>
+
+  <div class="toggle-container">
+    <label class="toggle-switch">
+      <input type="checkbox" id="themeToggle" onchange="toggleTheme()" />
+      <span class="slider"></span>
+    </label>
+  </div>
+</header>
+
+  <main>
+    <div id="chat-box"></div>
+    <input id="prompt" placeholder="Ask something..." />
+    <div class="buttons">
+      <button onclick="sendText()">Send (Text)</button>
+      <button onclick="voiceInput()">🎤 Ask (Voice)</button>
+    </div>
+  </main>
+
+  <footer>
+    Developed by Pramodkumar 🐜
+  </footer>
+
+  <script>
+    const chatBox = document.getElementById("chat-box");
+    const toggle = document.getElementById("themeToggle");
+    const body = document.body;
+
+    window.onload = () => {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "light") {
+        body.classList.add("light-mode");
+        toggle.checked = true;
+      }
+
+      const history = sessionStorage.getItem("chatHistory");
+      if (history) {
+        chatBox.innerHTML = history;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    };
+
+    function toggleTheme() {
+      if (toggle.checked) {
+        body.classList.add("light-mode");
+        localStorage.setItem("theme", "light");
+      } else {
+        body.classList.remove("light-mode");
+        localStorage.setItem("theme", "dark");
+      }
+    }
+
+    function appendMessage(sender, msg) {
+      const senderClass = sender === "You" ? "user" : "jarvis";
+      let html = "";
+
+      if (msg.includes("```")) {
+        const parts = msg.split("```");
+        html += `<p class="${senderClass}"><strong>${sender}:</strong></p>`;
+        for (let i = 0; i < parts.length; i++) {
+          if (i % 2 === 1) {
+            html += `<pre><code>${escapeHtml(parts[i])}</code></pre>`;
+          } else {
+            html += `<p>${escapeHtml(parts[i])}</p>`;
+          }
+        }
+      } else {
+        html += `<p class="${senderClass}"><strong>${sender}:</strong> ${escapeHtml(msg)}</p>`;
+      }
+
+      chatBox.innerHTML += html;
+      chatBox.scrollTop = chatBox.scrollHeight;
+      sessionStorage.setItem("chatHistory", chatBox.innerHTML);
+    }
+
+    function escapeHtml(text) {
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;',
+      };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    async function sendText() {
+      const promptInput = document.getElementById("prompt");
+      const prompt = promptInput.value.trim();
+      if (!prompt) return;
+
+      appendMessage("You", prompt);
+      promptInput.value = "";
+
+      const res = await fetch("/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
+      });
+
+      const data = await res.json();
+      appendMessage("Jarvis", data.response);
+    }
+
+    function voiceInput() {
+      const recognition = new webkitSpeechRecognition();
+      recognition.lang = "en-IN";
+      recognition.start();
+
+      recognition.onresult = function (event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById("prompt").value = transcript;
+        appendMessage("You", transcript);
+
+        fetch("/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: transcript })
+        })
+        .then(res => res.json())
+        .then(data => {
+          appendMessage("Jarvis", data.response);
+          speak(data.response);
+        });
+      };
+    }
+
+    function speak(text) {
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.lang = "en-IN";
+      window.speechSynthesis.speak(msg);
+    }
+
+    window.onbeforeunload = function () {
+      sessionStorage.removeItem("chatHistory");
+      fetch("/reset", { method: "POST" });
+    };
+  </script>
+</body>
+</html>
