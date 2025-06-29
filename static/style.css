@@ -303,4 +303,6 @@ body.light-mode .upload-btn {
   color: #ddd;
   font-size: 14px;
 }
-
+img{
+  border-radius: 10px;
+}
