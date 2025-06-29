@@ -227,12 +227,18 @@ body.light-mode .toggle-switch input:checked + .slider {
 /* === Voice Dropdown === */
 .dropdown {
   padding: 10px;
+  align-items: flex-start;
+  justify-content: flex-start;
   font-size: 16px;
   border-radius: 6px;
   background-color: #2d2d2d;
   color: white;
   border: 1px solid #555;
   cursor: pointer;
+}
+.voice{
+  /* padding: 10px; */
+  padding-right: 1500px;
 }
 
 body.light-mode .dropdown {
@@ -297,3 +303,4 @@ body.light-mode .upload-btn {
   color: #ddd;
   font-size: 14px;
 }
+

@@ -12,10 +12,10 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or "AIzaSyBMw5zLKW3m8zxff1ue81ReCF4
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-1.5-flash")
 
-# Temporary chat memory (cleared on tab/browser close)
+# Memory
 chat_history = []
 
-# File upload configuration
+# Upload settings
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'docx'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -58,23 +58,34 @@ def ask():
 
     try:
         response = model.generate_content(chat_history)
-        answer = response.text.strip()
-        chat_history.append({"role": "model", "parts": [answer]})
-        return jsonify({"response": answer})
+        raw_text = response.text.strip()
+
+        # Format code blocks using regex
+        import re
+        parts = re.split(r"```(?:\w+)?", raw_text)
+        formatted = ""
+        for i, part in enumerate(parts):
+            if i % 2 == 0:
+                # normal text
+                formatted += f"<p>{part.strip()}</p>\n"
+            else:
+                # code block
+                formatted += f"<pre><code>{part.strip()}</code></pre>\n"
+
+        chat_history.append({"role": "model", "parts": [formatted]})
+        return jsonify({"response": formatted})
     except Exception as e:
         print("Gemini Error:", e)
         return jsonify({"response": "Sorry, I encountered an error."})
+
 
 @app.route("/upload", methods=["POST"])
 def upload():
     if 'file' not in request.files:
         return jsonify({"response": "No file uploaded."})
-
     file = request.files['file']
-
     if file.filename == '':
         return jsonify({"response": "No selected file."})
-
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -93,7 +104,6 @@ def upload():
         except Exception as e:
             print("Gemini Error (File):", e)
             return jsonify({"response": "Gemini failed to analyze the file."})
-
     return jsonify({"response": "Unsupported file type."})
 
 @app.route("/reset", methods=["POST"])

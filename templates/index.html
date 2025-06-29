@@ -66,6 +66,11 @@
         width: 90%;
       }
     }
+
+    #pauseBtn {
+      display: none;
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
@@ -83,20 +88,21 @@
   </header>
 
   <main>
+    <!-- <div class="voice">
+      <select id="voiceGender" class="dropdown">
+        <option value="female">Female Voice</option>
+        <option value="male">Male</option>
+      </select>
+      </div> -->
     <div id="chat-box"></div>
     <div id="typing-indicator">Jarvis is typing...</div>
     <div class="mic-anim" id="micWave"></div>
-    <!-- <button onclick="toggleFullscreen()">🖵 Toggle Fullscreen</button> -->
     <input id="prompt" placeholder="Ask something..." onkeydown="handleEnter(event)" />
     <div class="buttons">
       <button onclick="sendText()">Send (Text)</button>
-      <button onclick="voiceInput()">🎤 Ask (Voice)</button>
-      <select id="voiceGender" class="dropdown">
-        <option value="female">Female Voice</option>
-        <option value="male">Male Voice</option>
-      </select>
+     <!-- Replace only the button label in HTML, keep your structure unchanged -->
+<button id="voiceToggleBtn" onclick="handleVoiceToggle()">🎤 Ask (Voice)</button>
     </div>
-
     <div class="file-upload">
       <input type="file" id="fileInput" class="file-input" />
       <button class="upload-btn" onclick="uploadFile()">Upload File</button>
@@ -107,179 +113,217 @@
     Developed by Pramodkumar 🐜
   </footer>
 
-  <script>
-    const chatBox = document.getElementById("chat-box");
-    const toggle = document.getElementById("themeToggle");
-    const body = document.body;
-    const micWave = document.getElementById("micWave");
-    const typingIndicator = document.getElementById("typing-indicator");
-    let voices = [];
-    let fromVoice = false;
+ <script>
+  const chatBox = document.getElementById("chat-box");
+  const toggle = document.getElementById("themeToggle");
+  const body = document.body;
+  const micWave = document.getElementById("micWave");
+  const typingIndicator = document.getElementById("typing-indicator");
+  const voiceToggleBtn = document.getElementById("voiceToggleBtn");
+  let voices = [];
+  let fromVoice = false;
+  let speakingUtterance;
+  let isSpeaking = false;
 
-    window.onload = () => {
-      const savedTheme = localStorage.getItem("theme");
-      if (savedTheme === "light") {
-        body.classList.add("light-mode");
-        toggle.checked = true;
-      }
-
-      const history = sessionStorage.getItem("chatHistory");
-      if (history) {
-        chatBox.innerHTML = history;
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }
-
-      speechSynthesis.onvoiceschanged = () => {
-        voices = speechSynthesis.getVoices();
-      };
-    };
-
-    function toggleTheme() {
-      if (toggle.checked) {
-        body.classList.add("light-mode");
-        localStorage.setItem("theme", "light");
-      } else {
-        body.classList.remove("light-mode");
-        localStorage.setItem("theme", "dark");
-      }
+  window.onload = () => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "light") {
+      body.classList.add("light-mode");
+      toggle.checked = true;
     }
 
-    // function toggleFullscreen() {
-    //   chatBox.classList.toggle("fullscreen");
-    // }
-
-    function appendMessage(sender, msg) {
-      const senderClass = sender === "You" ? "user" : "jarvis";
-      let html = `<p class="${senderClass}"><strong>${sender}:</strong> ${escapeHtml(msg)}</p>`;
-      chatBox.innerHTML += html;
+    const history = sessionStorage.getItem("chatHistory");
+    if (history) {
+      chatBox.innerHTML = history;
       chatBox.scrollTop = chatBox.scrollHeight;
-      sessionStorage.setItem("chatHistory", chatBox.innerHTML);
     }
 
-    function escapeHtml(text) {
-      const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;',
-      };
-      return text.replace(/[&<>"']/g, m => map[m]);
-    }
-
-    function handleEnter(event) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        sendText();
-      }
-    }
-
-    async function sendText() {
-      const promptInput = document.getElementById("prompt");
-      const prompt = promptInput.value.trim();
-      if (!prompt) return;
-
-      appendMessage("You", prompt);
-      promptInput.value = "";
-
-      const lower = prompt.toLowerCase();
-      if (lower.includes("open youtube")) {
-        window.open("https://youtube.com", "_blank");
-        appendMessage("Jarvis", "Opening YouTube...");
-        return;
-      }
-      if (lower.includes("open google")) {
-        window.open("https://google.com", "_blank");
-        appendMessage("Jarvis", "Opening Google...");
-        return;
-      }
-      if (lower.includes("open gmail")) {
-        window.open("https://mail.google.com", "_blank");
-        appendMessage("Jarvis", "Opening Gmail...");
-        return;
-      }
-      if (lower.includes("weather")) {
-        window.open("https://www.google.com/search?q=weather", "_blank");
-        appendMessage("Jarvis", "Here’s the weather forecast.");
-        return;
-      }
-      if (lower.includes("news")) {
-        window.open("https://news.google.com", "_blank");
-        appendMessage("Jarvis", "Showing the latest news.");
-        return;
-      }
-
-      typingIndicator.style.display = "block";
-      const res = await fetch("/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt })
-      });
-      typingIndicator.style.display = "none";
-
-      const data = await res.json();
-      appendMessage("Jarvis", data.response);
-
-      if (fromVoice) {
-        speak(data.response);
-        fromVoice = false;
-      }
-    }
-
-    function voiceInput() {
-      const recognition = new webkitSpeechRecognition();
-      recognition.lang = "en-IN";
-      fromVoice = true;
-      micWave.style.display = "block";
-      recognition.start();
-
-      recognition.onresult = function (event) {
-        micWave.style.display = "none";
-        const transcript = event.results[0][0].transcript;
-        document.getElementById("prompt").value = transcript;
-        sendText();
-      };
-
-      recognition.onerror = function () {
-        micWave.style.display = "none";
-      }
-    }
-
-    function speak(text) {
-      const gender = document.getElementById("voiceGender").value;
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "en-IN";
-      const match = voices.find(v => {
-        const voiceName = v.name.toLowerCase();
-        return gender === "female"
-          ? voiceName.includes("female") || v.name.includes("Zira") || v.name.includes("Siri")
-          : voiceName.includes("male") || v.name.includes("David") || v.name.includes("Alex");
-      });
-      if (match) utterance.voice = match;
-      speechSynthesis.speak(utterance);
-    }
-
-    async function uploadFile() {
-      const fileInput = document.getElementById("fileInput");
-      const file = fileInput.files[0];
-      if (!file) return alert("Please choose a file.");
-
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const res = await fetch("/upload", {
-        method: "POST",
-        body: formData
-      });
-
-      const data = await res.json();
-      appendMessage("Jarvis", data.response);
-    }
-
-    window.onbeforeunload = function () {
-      sessionStorage.removeItem("chatHistory");
-      fetch("/reset", { method: "POST" });
+    speechSynthesis.onvoiceschanged = () => {
+      voices = speechSynthesis.getVoices();
     };
-  </script>
+  };
+
+  function toggleTheme() {
+    if (toggle.checked) {
+      body.classList.add("light-mode");
+      localStorage.setItem("theme", "light");
+    } else {
+      body.classList.remove("light-mode");
+      localStorage.setItem("theme", "dark");
+    }
+  }
+
+  function appendMessage(sender, msg) {
+    const senderClass = sender === "You" ? "user" : "jarvis";
+    let html;
+
+    if (sender === "You") {
+      html = `<p class="${senderClass}"><strong>${sender}:</strong> ${escapeHtml(msg)}</p>`;
+    } else {
+      html = `<div class="${senderClass}"><strong>${sender}:</strong><br>${msg}</div>`;
+    }
+
+    chatBox.innerHTML += html;
+    chatBox.scrollTop = chatBox.scrollHeight;
+    sessionStorage.setItem("chatHistory", chatBox.innerHTML);
+  }
+
+  function escapeHtml(text) {
+    const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;',
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+  }
+
+  function stripHtml(html) {
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
+    return temp.textContent || temp.innerText || "";
+  }
+
+  function handleEnter(event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      sendText();
+    }
+  }
+
+  async function sendText() {
+    const promptInput = document.getElementById("prompt");
+    const prompt = promptInput.value.trim();
+    if (!prompt) return;
+
+    appendMessage("You", prompt);
+    promptInput.value = "";
+
+    const lower = prompt.toLowerCase();
+    if (lower.includes("open youtube")) {
+      window.open("https://youtube.com", "_blank");
+      appendMessage("Jarvis", "Opening YouTube...");
+      return;
+    }
+    if (lower.includes("open google")) {
+      window.open("https://google.com", "_blank");
+      appendMessage("Jarvis", "Opening Google...");
+      return;
+    }
+    if (lower.includes("open gmail")) {
+      window.open("https://mail.google.com", "_blank");
+      appendMessage("Jarvis", "Opening Gmail...");
+      return;
+    }
+    if (lower.includes("weather")) {
+      window.open("https://www.google.com/search?q=weather", "_blank");
+      appendMessage("Jarvis", "Here’s the weather forecast.");
+      return;
+    }
+    if (lower.includes("news")) {
+      window.open("https://news.google.com", "_blank");
+      appendMessage("Jarvis", "Showing the latest news.");
+      return;
+    }
+
+    typingIndicator.style.display = "block";
+    const res = await fetch("/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt })
+    });
+    typingIndicator.style.display = "none";
+
+    const data = await res.json();
+    appendMessage("Jarvis", data.response);
+
+    if (fromVoice) {
+      speak(data.response);
+      fromVoice = false;
+    }
+  }
+
+  function voiceInput() {
+    const recognition = new webkitSpeechRecognition();
+    recognition.lang = "en-IN";
+    fromVoice = true;
+    micWave.style.display = "block";
+    recognition.start();
+
+    recognition.onresult = function (event) {
+      micWave.style.display = "none";
+      const transcript = event.results[0][0].transcript;
+      document.getElementById("prompt").value = transcript;
+      sendText();
+    };
+
+    recognition.onerror = function () {
+      micWave.style.display = "none";
+    };
+  }
+
+  function speak(text) {
+    speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(stripHtml(text));
+    utterance.lang = "en-IN";
+
+    // Force female voice only (fallback to first female-like voice)
+    const femaleVoice = voices.find(v => {
+      const name = v.name.toLowerCase();
+      return name.includes("female") || name.includes("zira") || name.includes("siri");
+    });
+
+    if (femaleVoice) {
+      utterance.voice = femaleVoice;
+    }
+    // else leave default voice if no female voice found
+
+    speakingUtterance = utterance;
+    speechSynthesis.speak(utterance);
+
+    utterance.onstart = () => {
+      isSpeaking = true;
+      voiceToggleBtn.textContent = "⏸ Pause";
+    };
+    utterance.onend = () => {
+      isSpeaking = false;
+      voiceToggleBtn.textContent = "🎤 Ask (Voice)";
+      speakingUtterance = null;
+    };
+  }
+
+  function handleVoiceToggle() {
+    if (isSpeaking) {
+      speechSynthesis.cancel();
+      isSpeaking = false;
+      voiceToggleBtn.textContent = "🎤 Ask (Voice)";
+    } else {
+      voiceInput();
+    }
+  }
+
+  async function uploadFile() {
+    const fileInput = document.getElementById("fileInput");
+    const file = fileInput.files[0];
+    if (!file) return alert("Please choose a file.");
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/upload", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+    appendMessage("Jarvis", data.response);
+  }
+
+  window.onbeforeunload = function () {
+    sessionStorage.removeItem("chatHistory");
+    fetch("/reset", { method: "POST" });
+  };
+</script>
 </body>
 </html>
