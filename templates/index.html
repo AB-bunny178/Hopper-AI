@@ -154,7 +154,7 @@
   }
 
   function appendMessage(sender, msg) {
-    const senderClass = sender === "You" ? "user" : "jarvis";
+    const senderClass = sender === "You" ? "user" : "Hopper";
     let html;
 
     if (sender === "You") {
@@ -203,27 +203,27 @@
     const lower = prompt.toLowerCase();
     if (lower.includes("open youtube")) {
       window.open("https://youtube.com", "_blank");
-      appendMessage("Jarvis", "Opening YouTube...");
+      appendMessage("Hopper", "Opening YouTube...");
       return;
     }
     if (lower.includes("open google")) {
       window.open("https://google.com", "_blank");
-      appendMessage("Jarvis", "Opening Google...");
+      appendMessage("Hopper", "Opening Google...");
       return;
     }
     if (lower.includes("open gmail")) {
       window.open("https://mail.google.com", "_blank");
-      appendMessage("Jarvis", "Opening Gmail...");
+      appendMessage("Hopper", "Opening Gmail...");
       return;
     }
     if (lower.includes("weather")) {
       window.open("https://www.google.com/search?q=weather", "_blank");
-      appendMessage("Jarvis", "Here’s the weather forecast.");
+      appendMessage("Hopper", "Here’s the weather forecast.");
       return;
     }
     if (lower.includes("news")) {
       window.open("https://news.google.com", "_blank");
-      appendMessage("Jarvis", "Showing the latest news.");
+      appendMessage("Hopper", "Showing the latest news.");
       return;
     }
 
@@ -236,7 +236,7 @@
     typingIndicator.style.display = "none";
 
     const data = await res.json();
-    appendMessage("Jarvis", data.response);
+    appendMessage("Hopper", data.response);
 
     if (fromVoice) {
       speak(data.response);
@@ -317,7 +317,7 @@
     });
 
     const data = await res.json();
-    appendMessage("Jarvis", data.response);
+    appendMessage("Hopper", data.response);
   }
 
   window.onbeforeunload = function () {
