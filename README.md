@@ -32,8 +32,8 @@ Hopper AI is a personal assistant web application that leverages **Google Gemini
 
 ```bash
 # Clone the repo
-git clone https://github.com/yourusername/jarvis-ai.git
-cd jarvis-ai
+git clone https://github.com/yourusername/Hopper-ai.git
+cd Hopper-ai
 
 # Install Python dependencies (optional if Flask used)
 pip install -r requirements.txt
