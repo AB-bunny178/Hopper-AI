@@ -224,3 +224,76 @@ body.light-mode .toggle-switch .slider {
 body.light-mode .toggle-switch input:checked + .slider {
   background-color: #2196F3;
 }
+/* === Voice Dropdown === */
+.dropdown {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 6px;
+  background-color: #2d2d2d;
+  color: white;
+  border: 1px solid #555;
+  cursor: pointer;
+}
+
+body.light-mode .dropdown {
+  background-color: #f0f0f0;
+  color: #222;
+  border: 1px solid #ccc;
+}
+
+/* === File Upload === */
+.file-upload {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+
+.file-input {
+  background: #222;
+  color: #eee;
+  padding: 8px;
+  border: 1px solid #555;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.upload-btn {
+  background: linear-gradient(to right, #28a745, #218838);
+  border: none;
+  padding: 10px 18px;
+  color: white;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.upload-btn:hover {
+  background: linear-gradient(to right, #218838, #28a745);
+  transform: scale(1.05);
+}
+
+body.light-mode .file-input {
+  background: #e0e0e0;
+  color: #111;
+  border: 1px solid #bbb;
+}
+
+body.light-mode .upload-btn {
+  background: linear-gradient(to right, #4CAF50, #388E3C);
+}
+
+.history-box {
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: #1c1c1c;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #444;
+  border-radius: 5px;
+  color: #ddd;
+  font-size: 14px;
+}
